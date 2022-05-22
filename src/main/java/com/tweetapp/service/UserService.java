@@ -9,6 +9,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,31 +30,13 @@ public class UserService {
     }
 
     public User registerUser(User user){
-        User registeredUser;
-        try {
-            registeredUser = userRepository.insert(user);
-            System.out.println("Congratulations!!! You are now registered \n");
-            return registeredUser;
-        }
-        catch (Exception e) {
-            if(e instanceof DuplicateKeyException || e instanceof MongoWriteException) {
-                if (e.getMessage().contains("email dup key")) {
-                    System.out.println("A user with same email address already exists");
-                }
-                else if (e.getMessage().contains("username dup key")) {
-                    System.out.println("A user with same username already exists");
-                    String newUsername = consoleAppService.getUsernameDetails();
-                    user.setUsername(newUsername);
-                    registeredUser = registerUser(user);
-                    return registeredUser;
-                }
-            }
-            System.out.println("Error : " + e);
-        }
-        return null;
+        user.setCreatedAt(LocalDateTime.now());
+        User registeredUser = userRepository.insert(user);
+        System.out.println("Congratulations!!! You are now registered \n");
+        return registeredUser;
     }
 
-    public void loginUser(String email, String password) {
+    public boolean loginUser(String email, String password) {
         Optional<User> optionalUser = userRepository.findUserByEmail(email);
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -62,11 +45,22 @@ public class UserService {
                 LoggedInUser.setUser(user);
                 LoggedInUser.setUserId(user.getId());
                 System.out.println("You have logged in successfully !!!!\n");
+                return true;
             } else {
                 System.out.println("Your Password is incorrect. Please try again.\n");
+                return false;
             }
         } else {
             System.out.println("User does not exist in our records. Please register as new user.\n");
+            return false;
         }
+    }
+
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
+
+    public Optional<User> findUserByUsername(String username) {
+        return userRepository.findUserByUsername(username);
     }
 }

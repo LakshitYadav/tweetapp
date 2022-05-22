@@ -25,5 +25,11 @@ public class Tweet {
     private String repliedTo;
     private List<String> listOfReplies;
     private List<String> listOfTags;
+    private List<String> listOfLikes;
     private LocalDateTime tweetedAt;
+
+    public Tweet(String id, String tweetMessage) {
+        this.id = id;
+        this.tweetMessage = tweetMessage;
+    }
 }

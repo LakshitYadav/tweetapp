@@ -14,10 +14,17 @@ import org.springframework.context.ApplicationContext;
 public class TweetApplication {
 
 	public static void main(String[] args) throws Exception {
-		ApplicationContext applicationContext = SpringApplication.run(TweetApplication.class, args);
+		SpringApplication.run(TweetApplication.class, args);
 
-		ConsoleApp consoleApp = applicationContext.getBean(ConsoleApp.class);
-		consoleApp.runConsoleApplication();
+		/*
+		* For running the console based app :-
+		*
+		* ApplicationContext applicationContext =
+						SpringApplication.run(TweetApplication.class, args);
+		* ConsoleApp consoleApp = applicationContext.getBean(ConsoleApp.class);
+		* consoleApp.runConsoleApplication();
+		*
+		* */
 	}
 
 }

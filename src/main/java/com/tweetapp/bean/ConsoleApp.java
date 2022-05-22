@@ -46,7 +46,7 @@ public class ConsoleApp {
                 switch (finalUserChoice) {
                     case 1 :
                         Tweet newTweet = consoleAppService.postATweet();
-                        tweetService.postANewTweet(newTweet);
+//                        tweetService.postANewTweet(newTweet);
                         System.out.println("Tweet Posted Successfully\n");
                         break;
                     case 2 :
