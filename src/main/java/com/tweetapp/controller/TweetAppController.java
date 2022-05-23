@@ -6,6 +6,7 @@ import com.tweetapp.model.User;
 import com.tweetapp.model.UserCredentials;
 import com.tweetapp.service.TweetService;
 import com.tweetapp.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,6 +31,11 @@ public class TweetAppController {
     UserService userService;
 
     @PostMapping("/register")
+    @ApiOperation(value = "Register a new user",
+                  notes="User id and creation time will be auto-generated.\n\nPlease provide firstName, lastName, email, username, password, gender, dateOfBirth and avatarLink attributes as part of request body.",
+                  consumes = "application/json",
+                  produces = "text/plain, application/json",
+                  response = ResponseEntity.class)
     public ResponseEntity registerUser(@RequestBody User newUser) {
         User registeredUser = new User();
         try {
@@ -53,6 +59,10 @@ public class TweetAppController {
     }
 
     @PostMapping("/login")
+    @ApiOperation(value = "Validate User Credentials for login",
+            consumes = "application/json",
+            produces = "text/plain",
+            response = ResponseEntity.class)
     public ResponseEntity<Boolean> loginUser(@RequestBody UserCredentials userCredentials)
     {
         boolean isUserLoggedIn = userService.loginUser(userCredentials.getId(), userCredentials.getPassword());
@@ -66,16 +76,28 @@ public class TweetAppController {
     }
 
     @GetMapping("/all")
+    @ApiOperation(value = "Get list of all tweets",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<List<Tweet>> getAllTweets() {
+
         return ResponseEntity.ok(tweetService.getListOfAllTweets());
     }
 
     @GetMapping("/users/all")
+    @ApiOperation(value = "Get list of all users",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<List<User>> getAllUsers() {
+
         return ResponseEntity.ok(userService.getListOfAllUsers());
     }
 
     @GetMapping("/users/{username}")
+    @ApiOperation(value = "Get user details from username",
+            consumes = "application/json",
+            produces = "text/plain",
+            response = ResponseEntity.class)
     public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
         Optional<User> user =  userService.findUserByUsername(username);
 
@@ -88,12 +110,15 @@ public class TweetAppController {
     }
 
     @GetMapping("/{username}")
+    @ApiOperation(value = "Get list of all tweets posted by {username}",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<List<Tweet>> getAllTweetsByUsername(@PathVariable("username") String username) {
         Optional<User> user =  userService.findUserByUsername(username);
 
         if (user.isPresent()) {
             String userId = user.get().getId();
-            List<Tweet> tweets = tweetService.findAllTweetsByUser(userId);
+            List<Tweet> tweets = tweetService.findAllTweetsByUserId(userId);
             return ResponseEntity.ok(tweets);
         }
         else {
@@ -102,6 +127,11 @@ public class TweetAppController {
     }
 
     @PostMapping("/{username}/add")
+    @ApiOperation(value = "Post a new tweet for {username}",
+            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.",
+            consumes = "application/json",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<Tweet> postTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username) {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
@@ -112,6 +142,11 @@ public class TweetAppController {
     }
 
     @PutMapping("/{username}/update/{id}")
+    @ApiOperation(value = "Update a tweet made by {username}",
+            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.\n\n{username} => Username of the user who posted the initial tweet.\n\n{id} => Tweet ID of the tweet to be updated.",
+            consumes = "application/json",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<Tweet> updateTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
@@ -128,6 +163,10 @@ public class TweetAppController {
     }
 
     @DeleteMapping("/{username}/delete/{id}")
+    @ApiOperation(value = "Delete a tweet posted by {username}",
+            notes = "{username} => Username of the user who posted the tweet.\n\n{id} => Tweet ID of the tweet to be deleted",
+            produces = "text/plain",
+            response = ResponseEntity.class)
     public ResponseEntity<String> deleteTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
@@ -148,7 +187,12 @@ public class TweetAppController {
         return ResponseEntity.internalServerError().body(null);
     }
 
-    @PostMapping("/{username}/add/{id}")
+    @PostMapping("/{username}/reply/{id}")
+    @ApiOperation(value="Reply to a tweet",
+            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.\n\n{username} => Username of the user replying to the tweet {id}\n\n{id} => Tweet ID of the original tweet, for which the reply is being posted.",
+            consumes = "application/json",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<Tweet> replyTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
@@ -159,6 +203,10 @@ public class TweetAppController {
     }
 
     @PutMapping("/{username}/like/{id}")
+    @ApiOperation(value = "Like a tweet",
+            notes = "{username} => Username of the user liking the tweet.\n\n{id} => Tweet of the tweet which is being liked.",
+            produces = "application/json",
+            response = ResponseEntity.class)
     public ResponseEntity<Tweet> likeTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {

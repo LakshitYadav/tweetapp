@@ -1,11 +1,13 @@
 package com.tweetapp.model;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Document(collection = "tweet")
+@ApiModel(description = "Details about the Tweet")
 public class Tweet {
 
     @Id
@@ -23,13 +26,8 @@ public class Tweet {
     private String userId;
     private String username;
     private String repliedTo;
-    private List<String> listOfReplies;
     private List<String> listOfTags;
-    private List<String> listOfLikes;
+    private HashMap<String, Boolean> listOfLikes;
     private LocalDateTime tweetedAt;
 
-    public Tweet(String id, String tweetMessage) {
-        this.id = id;
-        this.tweetMessage = tweetMessage;
-    }
 }

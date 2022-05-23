@@ -1,9 +1,7 @@
 package com.tweetapp;
 
-import com.tweetapp.bean.ConsoleApp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 
 /**
  * @author Lakshit Yadav
@@ -15,16 +13,6 @@ public class TweetApplication {
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(TweetApplication.class, args);
-
-		/*
-		* For running the console based app :-
-		*
-		* ApplicationContext applicationContext =
-						SpringApplication.run(TweetApplication.class, args);
-		* ConsoleApp consoleApp = applicationContext.getBean(ConsoleApp.class);
-		* consoleApp.runConsoleApplication();
-		*
-		* */
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.tweetapp.service;
 
+import com.google.common.collect.Maps;
 import com.tweetapp.model.Tweet;
 import com.tweetapp.model.User;
 import com.tweetapp.repository.TweetRepository;
@@ -26,7 +27,7 @@ public class TweetService {
         return allTweets;
     }
 
-    public List<Tweet> findAllTweetsByUser(String userId) {
+    public List<Tweet> findAllTweetsByUserId(String userId) {
         Optional<List<Tweet>> optionalTweets = this.tweetRepository.findTweetsByUserId(userId);
 
         return optionalTweets.orElseGet(ArrayList::new);
@@ -35,34 +36,24 @@ public class TweetService {
     public Tweet postANewTweet(Tweet tweet, User user) {
         tweet.setUserId(user.getId());
         tweet.setUsername(user.getUsername());
-        tweet.setListOfReplies(Collections.EMPTY_LIST);
-        tweet.setListOfLikes(Collections.EMPTY_LIST);
+        tweet.setListOfLikes(Maps.newHashMap());
         tweet.setTweetedAt(LocalDateTime.now());
         Tweet newTweet =  this.tweetRepository.insert(tweet);
         return newTweet;
     }
 
     public Tweet updateTweet(Tweet tweet, User user) {
-        List<Tweet> listOfTweetsByUser = findAllTweetsByUser(user.getId());
-        for (Tweet eachTweet : listOfTweetsByUser) {
-            if(eachTweet.getId().equals(tweet.getId())) {
-                eachTweet.setTweetMessage(tweet.getTweetMessage());
-                Tweet updatedTweet = this.tweetRepository.save(eachTweet);
-                return updatedTweet;
-            }
-        }
-        return null;
+        Tweet originalTweet = this.tweetRepository.findTweetByIdAndUser(tweet.getId(), user.getId());
+        originalTweet.setTweetMessage(tweet.getTweetMessage());
+        originalTweet.setListOfTags(tweet.getListOfTags());
+        Tweet updatedTweet = this.tweetRepository.save(originalTweet);
+        return updatedTweet;
     }
 
     public String deleteTweet(String id, User user) {
-        List<Tweet> listOfTweetsByUser = findAllTweetsByUser(user.getId());
-        for (Tweet eachTweet : listOfTweetsByUser) {
-            if(eachTweet.getId().equals(id)) {
-                tweetRepository.deleteById(id);
-                return "Success";
-            }
-        }
-        return null;
+        Tweet originalTweet = this.tweetRepository.findTweetByIdAndUser(id, user.getId());
+        tweetRepository.deleteById(originalTweet.getId());
+        return "Success";
     }
 
     public Tweet replyTweet(String id, Tweet tweet, User user) {
@@ -72,12 +63,14 @@ public class TweetService {
     }
 
     public Tweet updateListOfLikes(String id, User user) {
+        String userId = user.getId();
         Tweet tweet = this.tweetRepository.findById(id).get();
-        List<String> originalList = tweet.getListOfLikes();
-        originalList.add(user.getId());
+        HashMap<String, Boolean> originalList = tweet.getListOfLikes();
+        if(originalList.get(userId) == null){
+            originalList.put(userId, true);
+        }
         tweet.setListOfLikes(originalList);
         Tweet updatedTweet = this.tweetRepository.save(tweet);
         return updatedTweet;
     }
-
 }
