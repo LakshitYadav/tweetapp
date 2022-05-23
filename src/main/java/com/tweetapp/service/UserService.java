@@ -13,10 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @author Lakshit Yadav
- */
-
 @Service
 public class UserService {
     @Autowired

@@ -12,10 +12,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * @author Lakshit Yadav
- */
-
 @Service
 public class ConsoleAppService {
     private final static String emailRegex = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$";

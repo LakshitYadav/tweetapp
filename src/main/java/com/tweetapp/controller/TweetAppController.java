@@ -7,17 +7,13 @@ import com.tweetapp.model.UserCredentials;
 import com.tweetapp.service.TweetService;
 import com.tweetapp.service.UserService;
 import io.swagger.annotations.ApiOperation;
-import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLOutput;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -91,6 +87,16 @@ public class TweetAppController {
     public ResponseEntity<List<User>> getAllUsers() {
 
         return ResponseEntity.ok(userService.getListOfAllUsers());
+    }
+
+    @GetMapping("/replies/{id}")
+    @ApiOperation(value = "Get list of all replies",
+            notes = "{id} => Tweet ID to get the replies for.",
+            produces = "application/json",
+            response = ResponseEntity.class)
+    public ResponseEntity<List<Tweet>> getAllReplies(@PathVariable("id") String id) {
+
+        return ResponseEntity.ok(tweetService.getListOfAllReplies(id));
     }
 
     @GetMapping("/users/{username}")

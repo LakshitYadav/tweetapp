@@ -3,10 +3,6 @@ package com.tweetapp.model;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-/**
- * @author Lakshit Yadav
- */
-
 @Data
 @Component
 public class LoggedInUser {

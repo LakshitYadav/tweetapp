@@ -8,14 +8,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @author Lakshit Yadav
- */
-
 @Repository
 public interface TweetRepository extends MongoRepository<Tweet, String> {
 
     Optional<List<Tweet>> findTweetsByUserId(String userId);
+
+    Optional<List<Tweet>> findTweetsByRepliedTo(String repliedTo);
 
     //To find the tweet where tweetId=id AND userId=userId
     @Query("{$and : [{id: ?0}, {userId: ?1}]}")

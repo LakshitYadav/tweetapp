@@ -10,11 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * @author Lakshit Yadav
- *
- */
-
 @Service
 public class TweetService {
 
@@ -25,6 +20,12 @@ public class TweetService {
         List<Tweet> allTweets =  this.tweetRepository.findAll();
         allTweets.sort(Comparator.comparing(Tweet::getTweetedAt));
         return allTweets;
+    }
+
+    public List<Tweet> getListOfAllReplies(String tweetId) {
+        Optional<List<Tweet>> optionalTweets = this.tweetRepository.findTweetsByRepliedTo(tweetId);
+
+        return optionalTweets.orElseGet(ArrayList::new);
     }
 
     public List<Tweet> findAllTweetsByUserId(String userId) {
