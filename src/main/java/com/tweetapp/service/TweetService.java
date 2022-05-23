@@ -45,7 +45,7 @@ public class TweetService {
 
     public Tweet updateTweet(Tweet tweet, User user) {
         Tweet originalTweet = this.tweetRepository.findTweetByIdAndUser(tweet.getId(), user.getId());
-        originalTweet.setTweetMessage(tweet.getTweetMessage());
+        originalTweet.setMessage(tweet.getMessage());
         originalTweet.setListOfTags(tweet.getListOfTags());
         Tweet updatedTweet = this.tweetRepository.save(originalTweet);
         return updatedTweet;

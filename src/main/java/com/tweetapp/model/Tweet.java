@@ -22,7 +22,7 @@ public class Tweet {
 
     @Id
     private String id;
-    private String tweetMessage;
+    private String message;
     private String userId;
     private String username;
     private String repliedTo;

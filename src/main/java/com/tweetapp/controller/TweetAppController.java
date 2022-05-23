@@ -134,7 +134,7 @@ public class TweetAppController {
 
     @PostMapping("/{username}/add")
     @ApiOperation(value = "Post a new tweet for {username}",
-            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.",
+            notes = "Request body should contain only **message** and **listOfTags** only.",
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)
@@ -149,7 +149,7 @@ public class TweetAppController {
 
     @PutMapping("/{username}/update/{id}")
     @ApiOperation(value = "Update a tweet made by {username}",
-            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.\n\n{username} => Username of the user who posted the initial tweet.\n\n{id} => Tweet ID of the tweet to be updated.",
+            notes = "Request body should contain only **message** and **listOfTags** only.\n\n{username} => Username of the user who posted the initial tweet.\n\n{id} => Tweet ID of the tweet to be updated.",
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)
@@ -195,7 +195,7 @@ public class TweetAppController {
 
     @PostMapping("/{username}/reply/{id}")
     @ApiOperation(value="Reply to a tweet",
-            notes = "Request body should contain only **tweetMessage** and **listOfTags** only.\n\n{username} => Username of the user replying to the tweet {id}\n\n{id} => Tweet ID of the original tweet, for which the reply is being posted.",
+            notes = "Request body should contain only **message** and **listOfTags** only.\n\n{username} => Username of the user replying to the tweet {id}\n\n{id} => Tweet ID of the original tweet, for which the reply is being posted.",
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)

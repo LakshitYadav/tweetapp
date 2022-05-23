@@ -223,7 +223,7 @@ public class ConsoleAppService {
             System.out.println("Enter tweet message (Max Limit: 144 characters): ");
             String tweetMessage = sc.nextLine();
             if (tweetMessage.length() <= 144) {
-                newTweet.setTweetMessage(tweetMessage);
+                newTweet.setMessage(tweetMessage);
                 break;
             }
             System.out.println("Tweet exceeded 144 characters.");
