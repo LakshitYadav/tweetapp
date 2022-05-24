@@ -26,6 +26,7 @@ public class Tweet {
     private String userId;
     private String username;
     private String repliedTo;
+    private int numberOfReplies;
     private List<String> listOfTags;
     private HashMap<String, Boolean> listOfLikes;
     private LocalDateTime tweetedAt;

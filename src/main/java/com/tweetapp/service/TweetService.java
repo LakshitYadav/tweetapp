@@ -42,6 +42,7 @@ public class TweetService {
         }
         tweet.setUserId(user.getId());
         tweet.setUsername(user.getUsername());
+        tweet.setNumberOfReplies(0);
         tweet.setListOfLikes(new HashMap<String, Boolean>());
         tweet.setTweetedAt(LocalDateTime.now());
         Tweet newTweet =  this.tweetRepository.insert(tweet);
@@ -75,7 +76,17 @@ public class TweetService {
 
     public Tweet replyTweet(String id, Tweet tweet, User user) throws InvalidTweetMessageException {
         tweet.setRepliedTo(id);
+        Optional<Tweet> optionalTweet = this.tweetRepository.findById(id);
+        if (optionalTweet.isEmpty()) {
+            throw new InvalidTweetMessageException("Requested Action could not be completed. Please check the request parameters.");
+        }
         Tweet tweetedReply = postANewTweet(tweet, user);
+
+        // Updating the number of Replies in Database
+        Tweet originalTweet = optionalTweet.get();
+        originalTweet.setNumberOfReplies(originalTweet.getNumberOfReplies() + 1);
+        this.tweetRepository.save(originalTweet);
+
         return tweetedReply;
     }
 
