@@ -1,8 +1,11 @@
 package com.tweetapp.service;
 
 import com.mongodb.MongoWriteException;
+import com.tweetapp.exception.InvalidUserCredentialsException;
+import com.tweetapp.exception.UserNotFoundException;
 import com.tweetapp.model.LoggedInUser;
 import com.tweetapp.model.User;
+import com.tweetapp.model.UserCredentials;
 import com.tweetapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -32,23 +35,21 @@ public class UserService {
         return registeredUser;
     }
 
-    public boolean loginUser(String email, String password) {
+    public UserCredentials loginUser(String email, String password) throws InvalidUserCredentialsException {
         Optional<User> optionalUser = userRepository.findUserByEmail(email);
+        UserCredentials userDetails;
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
             if(user.getPassword().equals(password)) {
-                LoggedInUser.setLoginStatus(true);
-                LoggedInUser.setUser(user);
-                LoggedInUser.setUserId(user.getId());
+                userDetails = new UserCredentials(email, null, user.getUsername());
                 System.out.println("You have logged in successfully !!!!\n");
-                return true;
+                return userDetails;
             } else {
-                System.out.println("Your Password is incorrect. Please try again.\n");
-                return false;
+                throw new InvalidUserCredentialsException("Requested User records does not exist.");
+
             }
         } else {
-            System.out.println("User does not exist in our records. Please register as new user.\n");
-            return false;
+            throw new InvalidUserCredentialsException("Requested User records does not exist.");
         }
     }
 

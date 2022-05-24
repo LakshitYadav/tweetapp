@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class UserCredentials {
     private String id;
     private String password;
+    private String username;
 }

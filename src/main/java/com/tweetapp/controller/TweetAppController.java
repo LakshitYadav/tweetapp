@@ -2,6 +2,7 @@ package com.tweetapp.controller;
 
 import com.mongodb.MongoWriteException;
 import com.tweetapp.exception.InvalidTweetMessageException;
+import com.tweetapp.exception.InvalidUserCredentialsException;
 import com.tweetapp.exception.TweetNotFoundException;
 import com.tweetapp.exception.UserNotFoundException;
 import com.tweetapp.model.Tweet;
@@ -61,18 +62,11 @@ public class TweetAppController {
     @PostMapping("/login")
     @ApiOperation(value = "Validate User Credentials for login",
             consumes = "application/json",
-            produces = "text/plain",
+            produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<Boolean> loginUser(@RequestBody UserCredentials userCredentials)
-    {
-        boolean isUserLoggedIn = userService.loginUser(userCredentials.getId(), userCredentials.getPassword());
-
-        if(isUserLoggedIn) {
-            return ResponseEntity.ok(true);
-        }
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(false);
+    public ResponseEntity<UserCredentials> loginUser(@RequestBody UserCredentials userCredentials) throws InvalidUserCredentialsException {
+        UserCredentials userDetails = userService.loginUser(userCredentials.getId(), userCredentials.getPassword());
+        return ResponseEntity.ok(userDetails);
     }
 
     @GetMapping("/all")

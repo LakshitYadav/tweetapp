@@ -34,4 +34,12 @@ public class GlobalExceptionHandler {
                 new ApiExceptionResponse(e.getMessage(), notFound.value(), notFound, LocalDateTime.now());
         return new ResponseEntity<>(apiExceptionResponse, notFound);
     }
+
+    @ExceptionHandler(InvalidUserCredentialsException.class)
+    public ResponseEntity<ApiExceptionResponse> handleInvalidUserCredentialsException(InvalidUserCredentialsException e) {
+        HttpStatus notFound = HttpStatus.NOT_FOUND;
+        ApiExceptionResponse apiExceptionResponse =
+                new ApiExceptionResponse(e.getMessage(), notFound.value(), notFound, LocalDateTime.now());
+        return new ResponseEntity<>(apiExceptionResponse, notFound);
+    }
 }
