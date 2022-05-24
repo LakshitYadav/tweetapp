@@ -1,6 +1,9 @@
 package com.tweetapp.controller;
 
 import com.mongodb.MongoWriteException;
+import com.tweetapp.exception.InvalidTweetMessageException;
+import com.tweetapp.exception.TweetNotFoundException;
+import com.tweetapp.exception.UserNotFoundException;
 import com.tweetapp.model.Tweet;
 import com.tweetapp.model.User;
 import com.tweetapp.model.UserCredentials;
@@ -12,6 +15,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,24 +36,24 @@ public class TweetAppController {
                   consumes = "application/json",
                   produces = "text/plain, application/json",
                   response = ResponseEntity.class)
-    public ResponseEntity registerUser(@RequestBody User newUser) {
-        User registeredUser = new User();
+    public ResponseEntity<Object> registerUser(@RequestBody User newUser) {
+        User registeredUser;
         try {
             registeredUser = userService.registerUser(newUser);
         }
         catch (Exception e) {
             if(e instanceof DuplicateKeyException || e instanceof MongoWriteException) {
                 if (e.getMessage().contains("email dup key")) {
-                    return ResponseEntity
-                            .status(HttpStatus.BAD_REQUEST)
-                            .body("A user with same email address already exists");
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "A user with same email already exists");
                 }
                 else if (e.getMessage().contains("username dup key")) {
-                    return ResponseEntity
-                            .status(HttpStatus.BAD_REQUEST)
-                            .body("A user with same username already exists");
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "A user with same username already exists");
                 }
             }
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_IMPLEMENTED, "Unable to register a new user.");
         }
         return ResponseEntity.ok(registeredUser);
     }
@@ -64,11 +68,11 @@ public class TweetAppController {
         boolean isUserLoggedIn = userService.loginUser(userCredentials.getId(), userCredentials.getPassword());
 
         if(isUserLoggedIn) {
-            return ResponseEntity.ok(isUserLoggedIn);
+            return ResponseEntity.ok(true);
         }
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(isUserLoggedIn);
+                .body(false);
     }
 
     @GetMapping("/all")
@@ -104,22 +108,20 @@ public class TweetAppController {
             consumes = "application/json",
             produces = "text/plain",
             response = ResponseEntity.class)
-    public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
+    public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) throws UserNotFoundException {
         Optional<User> user =  userService.findUserByUsername(username);
 
-        if (user.isPresent()) {
+        if (user.isPresent())
             return ResponseEntity.ok(user.get());
-        }
-        else {
-            return ResponseEntity.notFound().build();
-        }
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
 
     @GetMapping("/{username}")
     @ApiOperation(value = "Get list of all tweets posted by {username}",
             produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<List<Tweet>> getAllTweetsByUsername(@PathVariable("username") String username) {
+    public ResponseEntity<List<Tweet>> getAllTweetsByUsername(@PathVariable("username") String username) throws UserNotFoundException {
         Optional<User> user =  userService.findUserByUsername(username);
 
         if (user.isPresent()) {
@@ -127,9 +129,8 @@ public class TweetAppController {
             List<Tweet> tweets = tweetService.findAllTweetsByUserId(userId);
             return ResponseEntity.ok(tweets);
         }
-        else {
-            return ResponseEntity.notFound().build();
-        }
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
 
     @PostMapping("/{username}/add")
@@ -138,13 +139,14 @@ public class TweetAppController {
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<Tweet> postTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username) {
+    public ResponseEntity<Tweet> postTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username) throws UserNotFoundException, InvalidTweetMessageException {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
             Tweet newTweet = tweetService.postANewTweet(tweet, user.get());
             return ResponseEntity.ok(newTweet);
         }
-        return ResponseEntity.notFound().build();
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
 
     @PutMapping("/{username}/update/{id}")
@@ -153,19 +155,15 @@ public class TweetAppController {
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<Tweet> updateTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) {
+    public ResponseEntity<Tweet> updateTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) throws InvalidTweetMessageException, TweetNotFoundException, UserNotFoundException {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
             tweet.setId(id);
             Tweet updatedTweet = tweetService.updateTweet(tweet, user.get());
-            if(updatedTweet == null) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(null);
-            }
             return ResponseEntity.ok(updatedTweet);
         }
-        return ResponseEntity.internalServerError().body(null);
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
 
     @DeleteMapping("/{username}/delete/{id}")
@@ -173,25 +171,14 @@ public class TweetAppController {
             notes = "{username} => Username of the user who posted the tweet.\n\n{id} => Tweet ID of the tweet to be deleted",
             produces = "text/plain",
             response = ResponseEntity.class)
-    public ResponseEntity<String> deleteTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) {
+    public ResponseEntity<String> deleteTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) throws TweetNotFoundException, UserNotFoundException {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
-            try{
-                String success = tweetService.deleteTweet(id, user.get());
-                if(success == null) {
-                    return ResponseEntity
-                            .status(HttpStatus.UNAUTHORIZED)
-                            .body(null);
-                }
-                return ResponseEntity.ok(success);
-            }
-            catch (Exception e) {
-                System.out.println(e);
-                return ResponseEntity.internalServerError().body(null);
-            }
+            String success = tweetService.deleteTweet(id, user.get());
+            return ResponseEntity.ok(success);
         }
-        return ResponseEntity.internalServerError().body(null);
-    }
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");    }
 
     @PostMapping("/{username}/reply/{id}")
     @ApiOperation(value="Reply to a tweet",
@@ -199,13 +186,14 @@ public class TweetAppController {
             consumes = "application/json",
             produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<Tweet> replyTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) {
+    public ResponseEntity<Tweet> replyTweetByUsername(@RequestBody Tweet tweet, @PathVariable("username") String username, @PathVariable("id") String id) throws InvalidTweetMessageException, UserNotFoundException {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
             Tweet tweetedReply = tweetService.replyTweet(id, tweet, user.get());
             return ResponseEntity.ok(tweetedReply);
         }
-        return ResponseEntity.notFound().build();
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
 
     @PutMapping("/{username}/like/{id}")
@@ -213,13 +201,13 @@ public class TweetAppController {
             notes = "{username} => Username of the user liking the tweet.\n\n{id} => Tweet of the tweet which is being liked.",
             produces = "application/json",
             response = ResponseEntity.class)
-    public ResponseEntity<Tweet> likeTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) {
+    public ResponseEntity<Tweet> likeTweetByUsername(@PathVariable("username") String username, @PathVariable("id") String id) throws UserNotFoundException, InvalidTweetMessageException {
         Optional<User> user = userService.findUserByUsername(username);
         if(user.isPresent()) {
             Tweet updatedTweet = tweetService.updateListOfLikes(id, user.get());
             return ResponseEntity.ok(updatedTweet);
         }
-        return ResponseEntity.notFound().build();
+        else
+            throw new UserNotFoundException("Requested User records does not exist.");
     }
-
 }

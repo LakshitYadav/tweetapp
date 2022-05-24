@@ -1,6 +1,7 @@
 package com.tweetapp.service;
 
-import com.google.common.collect.Maps;
+import com.tweetapp.exception.InvalidTweetMessageException;
+import com.tweetapp.exception.TweetNotFoundException;
 import com.tweetapp.model.Tweet;
 import com.tweetapp.model.User;
 import com.tweetapp.repository.TweetRepository;
@@ -34,38 +35,57 @@ public class TweetService {
         return optionalTweets.orElseGet(ArrayList::new);
     }
 
-    public Tweet postANewTweet(Tweet tweet, User user) {
+    public Tweet postANewTweet(Tweet tweet, User user) throws InvalidTweetMessageException {
+        String tweetMessage = tweet.getMessage();
+        if (tweetMessage == null || tweetMessage.trim().length() == 0) {
+            throw new InvalidTweetMessageException("Tweet cannot be empty");
+        }
         tweet.setUserId(user.getId());
         tweet.setUsername(user.getUsername());
-        tweet.setListOfLikes(Maps.newHashMap());
+        tweet.setListOfLikes(new HashMap<String, Boolean>());
         tweet.setTweetedAt(LocalDateTime.now());
         Tweet newTweet =  this.tweetRepository.insert(tweet);
         return newTweet;
     }
 
-    public Tweet updateTweet(Tweet tweet, User user) {
+    public Tweet updateTweet(Tweet tweet, User user) throws InvalidTweetMessageException, TweetNotFoundException {
+        String tweetMessage = tweet.getMessage();
+        if (tweetMessage == null || tweetMessage.trim().length() == 0) {
+            throw new InvalidTweetMessageException("Tweet cannot be empty");
+        }
         Tweet originalTweet = this.tweetRepository.findTweetByIdAndUser(tweet.getId(), user.getId());
-        originalTweet.setMessage(tweet.getMessage());
+        System.out.println(originalTweet);
+        if (originalTweet == null) {
+            throw new TweetNotFoundException("Requested Tweet does not exist. Please check the request parameters.");
+        }
+        originalTweet.setMessage(tweetMessage);
         originalTweet.setListOfTags(tweet.getListOfTags());
         Tweet updatedTweet = this.tweetRepository.save(originalTweet);
         return updatedTweet;
     }
 
-    public String deleteTweet(String id, User user) {
+    public String deleteTweet(String id, User user) throws TweetNotFoundException {
         Tweet originalTweet = this.tweetRepository.findTweetByIdAndUser(id, user.getId());
+        if (originalTweet == null) {
+            throw new TweetNotFoundException("Requested Tweet does not exist. Please check the request parameters.");
+        }
         tweetRepository.deleteById(originalTweet.getId());
         return "Success";
     }
 
-    public Tweet replyTweet(String id, Tweet tweet, User user) {
+    public Tweet replyTweet(String id, Tweet tweet, User user) throws InvalidTweetMessageException {
         tweet.setRepliedTo(id);
         Tweet tweetedReply = postANewTweet(tweet, user);
         return tweetedReply;
     }
 
-    public Tweet updateListOfLikes(String id, User user) {
+    public Tweet updateListOfLikes(String id, User user) throws InvalidTweetMessageException {
         String userId = user.getId();
-        Tweet tweet = this.tweetRepository.findById(id).get();
+        Optional<Tweet> optionalTweet = this.tweetRepository.findById(id);
+        if (optionalTweet.isEmpty()) {
+            throw new InvalidTweetMessageException("Requested Tweet does not exist. Please check the request parameters.");
+        }
+        Tweet tweet = optionalTweet.get();
         HashMap<String, Boolean> originalList = tweet.getListOfLikes();
         if(originalList.get(userId) == null){
             originalList.put(userId, true);
