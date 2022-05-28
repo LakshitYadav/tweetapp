@@ -68,6 +68,13 @@ public class TweetService {
         if (originalTweet == null) {
             throw new TweetNotFoundException("Requested Tweet does not exist. Please check the request parameters.");
         }
+
+        Optional<Tweet> optionalTweet = this.tweetRepository.findById(originalTweet.getRepliedTo());
+        if(optionalTweet.isPresent()) {
+            Tweet mainTweet = optionalTweet.get();
+            mainTweet.setNumberOfReplies(originalTweet.getNumberOfReplies() - 1);
+        }
+
         tweetRepository.deleteById(originalTweet.getId());
         return "Success";
     }
