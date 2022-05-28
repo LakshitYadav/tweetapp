@@ -6,6 +6,7 @@ import com.tweetapp.model.Tweet;
 import com.tweetapp.model.User;
 import com.tweetapp.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,8 +19,7 @@ public class TweetService {
     TweetRepository tweetRepository;
 
     public List<Tweet> getListOfAllTweets() {
-        List<Tweet> allTweets =  this.tweetRepository.findAll();
-        allTweets.sort(Comparator.comparing(Tweet::getTweetedAt));
+        List<Tweet> allTweets =  this.tweetRepository.findAll(Sort.by(Sort.Direction.DESC, "repliedTo"));
         return allTweets;
     }
 

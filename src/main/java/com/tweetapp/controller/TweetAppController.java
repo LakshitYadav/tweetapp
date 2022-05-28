@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1.0/tweets")
 public class TweetAppController {
 
@@ -204,4 +205,14 @@ public class TweetAppController {
         else
             throw new UserNotFoundException("Requested User records does not exist.");
     }
+
+//    @GetMapping("user/search/{username}")
+//    @ApiOperation(value = "Search for users",
+//            notes = "{username} => Partial or Complete starting of the Username",
+//            produces = "application/json",
+//            response = ResponseEntity.class)
+//    public ResponseEntity<List<User>> searchUsersByUsernameStartingWith(@PathVariable("username") String username) {
+//        List<User> users = userService.searchUsersByUsername(username);
+//        return ResponseEntity.ok(users);
+//    }
 }

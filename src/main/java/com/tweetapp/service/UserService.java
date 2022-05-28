@@ -1,17 +1,12 @@
 package com.tweetapp.service;
 
-import com.mongodb.MongoWriteException;
 import com.tweetapp.exception.InvalidUserCredentialsException;
-import com.tweetapp.exception.UserNotFoundException;
-import com.tweetapp.model.LoggedInUser;
 import com.tweetapp.model.User;
 import com.tweetapp.model.UserCredentials;
 import com.tweetapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
