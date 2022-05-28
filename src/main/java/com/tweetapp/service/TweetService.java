@@ -72,7 +72,8 @@ public class TweetService {
         Optional<Tweet> optionalTweet = this.tweetRepository.findById(originalTweet.getRepliedTo());
         if(optionalTweet.isPresent()) {
             Tweet mainTweet = optionalTweet.get();
-            mainTweet.setNumberOfReplies(originalTweet.getNumberOfReplies() - 1);
+            mainTweet.setNumberOfReplies(mainTweet.getNumberOfReplies() - 1);
+            this.tweetRepository.save(mainTweet);
         }
 
         tweetRepository.deleteById(originalTweet.getId());
