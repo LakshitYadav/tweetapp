@@ -30,6 +30,7 @@ public class User {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date dateOfBirth;
     private String avatarLink;
+    private String securityAnswer;
     private LocalDateTime createdAt;
 
     public User(String firstName, String lastName, String email, String username, String password, Gender gender, Date dateOfBirth, String avatarLink, LocalDateTime createdAt) {

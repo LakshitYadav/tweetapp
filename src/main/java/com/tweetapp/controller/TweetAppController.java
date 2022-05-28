@@ -60,6 +60,27 @@ public class TweetAppController {
         return ResponseEntity.ok(registeredUser);
     }
 
+    @PostMapping("/validate/question")
+    @ApiOperation(value = "Validate User Credentials for Security Questions",
+            notes = "Provide email and securityAnswer fields in request body",
+            consumes = "application/json",
+            produces = "text/plain",
+            response = ResponseEntity.class)
+    public boolean validateSecurityAnswer(@RequestBody User securityQuestionDetails) throws UserNotFoundException {
+        return userService.checkAnswerValidity(securityQuestionDetails.getEmail(), securityQuestionDetails.getSecurityAnswer());
+    }
+
+    @PostMapping("/changePassword")
+    @ApiOperation(value = "Update user's password",
+            notes = "Provide email and password fields in request body",
+            consumes = "application/json",
+            produces = "text/plain",
+            response = ResponseEntity.class)
+    public ResponseEntity<User> changePassword(@RequestBody User user) throws UserNotFoundException {
+        User updatedUser = userService.updatePassword(user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
     @PostMapping("/login")
     @ApiOperation(value = "Validate User Credentials for login",
             consumes = "application/json",
